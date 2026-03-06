@@ -1,195 +1,310 @@
 # 🚀 Edge UPI Behavioural Risk Intelligence System
 
-AI-powered behavioural fraud detection system for **UPI transactions** using **FastAPI, Machine Learning, and Streamlit**.
+A modern AI-powered fraud detection platform designed to detect suspicious UPI transactions using behavioural analytics, machine learning, and explainable AI.
 
-This project simulates how modern fintech companies detect suspicious transactions using behavioural patterns, machine learning models, and real-time monitoring dashboards.
+This project demonstrates how intelligent risk systems can monitor financial activity, identify fraud patterns, and provide real-time insights for safer digital payment ecosystems.
 
----
+In a world where digital transactions happen every second, building secure and intelligent fraud detection systems is no longer optional — it is essential.
 
-# 🧠 Key Features
-
-* Behavioural fraud detection
-* Real-time transaction risk scoring
-* Trust score modelling
-* Fraud activity monitoring dashboard
-* Fraud heatmap visualization
-* Fraud ring detection
-* Machine learning risk prediction
-* API-based risk engine
+This system was developed with a mindset of **discipline, engineering clarity, and continuous learning**.
 
 ---
 
-# 🏗 System Architecture
+# 🌍 Vision
 
-```
-UPI Transaction
-│
-▼
-FastAPI Backend (Risk Engine)
-│
-▼
-Behaviour Analysis Layer
-│
-▼
-Machine Learning Models
-(Logistic Regression / LSTM)
-│
-▼
-Risk Score Generation
-│
-▼
-Fraud Monitoring Dashboard
+Financial fraud is becoming more sophisticated every day. Traditional rule-based systems are no longer enough.
+
+This project aims to demonstrate how **AI-driven behavioural intelligence systems** can strengthen fraud detection by analyzing transaction patterns, user behaviour, and network relationships.
+
+The goal is not just to detect fraud — but to **understand it, explain it, and prevent it**.
+
+---
+
+# 🧠 System Architecture
+
+UPI Transaction  
+│  
+▼  
+FastAPI Backend (Risk Engine)  
+│  
+▼  
+Behaviour Analysis Layer  
+│  
+▼  
+Machine Learning Models  
+(Logistic Regression / LSTM)  
+│  
+▼  
+Risk Score Generation  
+│  
+▼  
+Fraud Monitoring Dashboard  
 (Streamlit)
-```
 
 ---
 
-# 🔌 API Endpoints
+# 🔍 Core Transaction Inputs
 
-## Score Transaction Risk
+The system analyzes the following transaction parameters:
+
+### 1️⃣ user_id
+
+Instead of using raw UPI IDs like:
 
 ```
-POST /score
+rahul@ybl
+user@okaxis
 ```
 
-Example Input:
+we use an internal identifier:
 
-```json
-{
-  "user_id": 101,
-  "amount": 5000,
-  "time_gap": 10,
-  "is_night": 1
-}
+```
+user_id = 101
 ```
 
-Example Output:
+### Why use user_id instead of UPI ID?
 
-```json
-{
-  "risk_score": 0.78,
-  "decision": "HIGH_RISK",
-  "trust_score": 0.45
-}
-```
+• Protects user privacy  
+• Prevents exposure of sensitive payment IDs  
+• Improves database indexing performance  
+• Allows faster machine learning computations  
+• Standard practice in financial systems  
+
+Almost all large fintech companies internally map sensitive identifiers to secure numeric IDs.
 
 ---
 
-## User Risk History
+### 2️⃣ amount
 
-```
-GET /risk-history/{user_id}
-```
+Transaction value being processed.
 
-Returns historical risk trends for the specified user.
+Large transactions are generally considered **higher risk**, especially if they deviate from normal user behaviour.
 
 ---
 
-## Fraud Heatmap
+### 3️⃣ time_gap
+
+Time gap represents the **difference between two consecutive transactions of the same user**.
+
+Example:
 
 ```
-GET /fraud-heatmap
+Transaction 1 → 10:00:00
+Transaction 2 → 10:00:10
 ```
 
-Visualizes geographic distribution of suspicious transactions.
+Time Gap Calculation:
+
+```
+time_gap = current_transaction_time - previous_transaction_time
+```
+
+In this system the value is measured in **seconds**.
+
+Small time gaps often indicate **velocity attacks**, where fraudsters rapidly execute multiple transactions.
 
 ---
 
-## Fraud Feed
+### 4️⃣ night_transaction
+
+Binary indicator showing whether the transaction occurred during late hours.
 
 ```
-GET /fraud-feed
+0 = Day Transaction
+1 = Night Transaction
 ```
 
-Displays a real-time stream of detected suspicious transactions.
+Binary encoding is used because machine learning models require numerical inputs rather than text values.
+
+Night-time transactions often have higher fraud probability.
 
 ---
 
-## Fraud Ring Detection
+# 🧮 Risk Scoring Engine
+
+The risk engine evaluates multiple behavioural signals to generate a **risk score**.
+
+Example Output
 
 ```
-GET /fraud-rings
+risk_score: 780
+decision: STEP_UP_AUTH
+trust_score: 220
 ```
 
-Identifies groups of users exhibiting coordinated fraud behaviour.
+Decision levels:
+
+| Risk Score | Decision |
+|------|------|
+0 – 300 | APPROVE |
+300 – 600 | REVIEW |
+600 – 800 | STEP_UP_AUTH |
+800+ | BLOCK_TRANSACTION |
 
 ---
 
-# 📊 Dashboard Features
+# 🤖 Explainable AI (Risk Explanation)
 
-The **Streamlit dashboard** provides:
+Most AI systems operate as **black boxes**, making decisions without explaining why.
 
-* Transaction risk simulation
-* User risk trend visualization
-* Fraud heatmap monitoring
-* Live fraud activity feed
-* Fraud ring detection panel
+This project introduces **Explainable AI** to provide transparency.
 
-This allows analysts to monitor fraud behaviour in real time.
+Example explanation:
+
+```
+amount_contribution: 500
+time_gap_contribution: -0.2
+night_risk: 50
+```
+
+This helps analysts understand **why a transaction was flagged as risky**.
+
+Explainability is extremely important for:
+
+• regulatory compliance  
+• fraud investigations  
+• customer dispute resolution  
+
+---
+
+# 📊 User Risk Trend
+
+The system tracks a user's historical risk behaviour.
+
+Example pattern:
+
+```
+Day 1 → Risk 200
+Day 3 → Risk 420
+Day 5 → Risk 760
+```
+
+A gradual increase in risk score may indicate:
+
+• account takeover  
+• credential compromise  
+• behaviour manipulation  
+
+Tracking risk trends helps analysts detect fraud earlier.
+
+---
+
+# 🌐 Fraud Ring Detection
+
+Fraud is often not performed by a single account but by **organized networks of accounts working together**.
+
+Example fraud ring:
+
+```
+User A → User B
+User B → User C
+User C → User A
+```
+
+This creates a suspicious transaction cycle.
+
+Graph analysis helps detect these patterns and identify coordinated fraud groups.
+
+---
+
+# 📡 Live Fraud Feed
+
+Provides a real-time stream of suspicious transactions.
+
+Example output:
+
+```
+User 101 → Risk 850
+User 204 → Risk 910
+User 333 → Risk 780
+```
+
+This allows analysts to monitor fraud activity as it happens.
+
+---
+
+# 🚨 Live Fraud Alerts
+
+Alerts are automatically generated when a transaction exceeds the high-risk threshold.
+
+Example alert:
+
+```
+ALERT
+User: 502
+Risk Score: 920
+Decision: BLOCK_TRANSACTION
+```
+
+This enables fast response to potentially fraudulent activity.
+
+---
+
+# 📊 Dashboard Capabilities
+
+The Streamlit dashboard provides:
+
+• transaction risk simulation  
+• risk trend visualization  
+• fraud heatmap monitoring  
+• live fraud feed  
+• fraud ring detection panel  
+• explainable AI breakdown  
+
+The dashboard acts as a **real-time fraud monitoring console**.
 
 ---
 
 # ▶️ Running the Project
 
-## 1️⃣ Clone Repository
+### Clone Repository
 
-```bash
+```
 git clone https://github.com/unnikrishnanavida/edge-upi-risk-intelligence.git
 cd edge-upi-risk-intelligence
 ```
 
 ---
 
-## 2️⃣ Install Dependencies
+### Install Dependencies
 
-```bash
+```
 pip install -r requirements.txt
 ```
 
 ---
 
-## 3️⃣ Start FastAPI Server
+### Start FastAPI Server
 
-```bash
-uvicorn api:app --reload
+```
+uvicorn backend.api:app --reload
 ```
 
-API will run at:
+API runs at:
 
 ```
 http://127.0.0.1:8000
 ```
 
----
+Swagger API Documentation:
 
-## 4️⃣ Run Dashboard
-
-```bash
-streamlit run dashboard.py
+```
+http://127.0.0.1:8000/docs
 ```
 
-Dashboard opens at:
+---
+
+### Run Dashboard
+
+```
+streamlit run dashboard/dashboard.py
+```
+
+Dashboard runs at:
 
 ```
 http://localhost:8501
 ```
-
----
-
-# 📸 Dashboard Preview
-
-Add screenshots inside the `screenshots` folder.
-
-Example:
-
-```
-screenshots/dashboard.png
-screenshots/fraud_heatmap.png
-screenshots/risk_trend.png
-screenshots/fraud_ring.png
-```
-
-These screenshots help demonstrate system capabilities visually.
 
 ---
 
@@ -198,63 +313,68 @@ These screenshots help demonstrate system capabilities visually.
 ```
 edge-upi-risk-intelligence
 │
-├── backend
-│   ├── app
-│   │   ├── core
-│   │   ├── services
-│   │   └── api.py
+├ backend
+│   ├ api.py
+│   ├ app
+│   │   ├ core
+│   │   ├ services
 │
-├── dashboard
-│   └── dashboard.py
+├ dashboard
+│   └ dashboard.py
 │
-├── models
-│   ├── logistic_model.pkl
-│   └── lstm_model.pt
+├ models
+│   ├ logistic_model.pkl
+│   └ lstm_model.pt
 │
-├── data
-│   └── risk_history.json
+├ data
+│   └ risk_history.json
 │
-├── logs
-│   └── risk_engine.log
+├ logs
+│   └ risk_engine.log
 │
-├── requirements.txt
-└── README.md
+├ requirements.txt
+└ README.md
 ```
 
 ---
 
-# 🎯 Project Goals
+# 🎯 What This Project Demonstrates
 
-This project demonstrates how **AI + behavioural analytics** can strengthen fraud detection in digital payment ecosystems.
+This system showcases how AI can be used to build **intelligent risk engines for fintech systems**.
 
-The system models how fintech platforms monitor transactions and evaluate behavioural risk in real time.
+It integrates:
 
-It is designed as a **prototype risk intelligence platform for modern digital payment systems**.
+• behavioural analytics  
+• machine learning risk scoring  
+• explainable AI  
+• fraud network detection  
+• real-time monitoring dashboards  
+
+These are the same foundational principles used in modern financial fraud detection systems.
 
 ---
 
 # 🚀 Future Improvements
 
-Planned upgrades for the system include:
+Planned upgrades include:
 
-* Graph-based fraud detection
-* SHAP explainability for model decisions
-* Real-time Kafka transaction stream
-* PostgreSQL transaction storage
-* JWT authentication for APIs
-* Production deployment with Docker
-* Advanced anomaly detection models
-* Real-time fraud alert system
+• Graph neural networks for fraud detection  
+• Real-time transaction streaming with Kafka  
+• PostgreSQL database integration  
+• SHAP-based explainability models  
+• Docker deployment  
+• distributed risk engines  
 
 ---
 
 # 👨‍💻 Author
 
-**N. Unnikrishna**
+**N. Unni Krishna**
 
-AI / ML Developer
-Focused on **AI systems, fraud detection, and intelligent risk analytics**.
+AI / ML Developer  
 
----
+Focused on building intelligent systems for:
 
-⭐ If you find this project useful, consider **starring the repository**.
+• Fraud Detection  
+• Behavioural Analytics  
+• Financial Risk Intelligence  
