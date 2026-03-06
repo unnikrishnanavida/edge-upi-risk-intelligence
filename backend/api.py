@@ -2,26 +2,29 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.responses import RedirectResponse
 
-from app.core.database import get_connection
-from app.services.velocity_service import check_velocity
-from app.services.drift_service import detect_risk_drift
-from app.services.graph_fraud_service import detect_fraud_rings
+# Core services
+from backend.app.core.database import get_connection
+
+# Behaviour services
+from backend.app.services.velocity_service import check_velocity
+from backend.app.services.drift_service import detect_risk_drift
+from backend.app.services.graph_fraud_service import detect_fraud_rings
+
+# AI + Alerts
+from backend.app.services.alert_service import add_alert, get_alerts
+from backend.app.services.shap_service import explain_transaction
 
 
 app = FastAPI(title="Edge UPI Behavioural Risk Intelligence System")
 
 
 # ---------------------------------------------------
-# Home Route (Fix for / Not Found)
+# Home Route
 # ---------------------------------------------------
 
 @app.get("/")
 def home():
     return RedirectResponse(url="/docs")
-    return {
-        "message": "Edge UPI Behavioural Risk Intelligence System API is running",
-        "docs": "http://127.0.0.1:8000/docs"
-    }
 
 
 # ---------------------------------------------------
@@ -29,7 +32,6 @@ def home():
 # ---------------------------------------------------
 
 class Transaction(BaseModel):
-
     user_id: int
     amount: float
     time_gap: float
@@ -62,19 +64,35 @@ def decision_engine(score):
 @app.post("/score")
 def score_transaction(tx: Transaction):
 
+    # Base risk
     risk_score = tx.amount * 0.1
 
+    # Velocity check
     velocity = check_velocity(tx.user_id)
 
     if velocity["velocity_attack"]:
         risk_score += 200
 
+    # Risk drift detection
     drift = detect_risk_drift(risk_score)
 
+    # Final decision
     decision = decision_engine(risk_score)
 
     trust_score = max(0, 1000 - risk_score)
 
+    # Fraud alert trigger
+    if risk_score > 800:
+        add_alert(tx.user_id, risk_score, decision)
+
+    # Explainable AI
+    explanation = explain_transaction(
+        tx.amount,
+        tx.time_gap,
+        tx.is_night
+    )
+
+    # Store transaction
     conn = get_connection()
     cur = conn.cursor()
 
@@ -104,7 +122,8 @@ def score_transaction(tx: Transaction):
         "decision": decision,
         "velocity_attack": velocity["velocity_attack"],
         "risk_drift": drift,
-        "trust_score": trust_score
+        "trust_score": trust_score,
+        "explanation": explanation
     }
 
 
@@ -227,4 +246,18 @@ def fraud_rings():
 
     return {
         "suspicious_clusters": rings
+    }
+
+
+# ---------------------------------------------------
+# Live Fraud Alerts
+# ---------------------------------------------------
+
+@app.get("/fraud-alerts")
+def fraud_alerts():
+
+    alerts = get_alerts()
+
+    return {
+        "alerts": alerts
     }

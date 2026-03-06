@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
 import pandas as pd
+import networkx as nx
+import matplotlib.pyplot as plt
 
 API_URL = "http://127.0.0.1:8000"
 
@@ -44,6 +46,30 @@ if st.button("Check Risk"):
         st.write("Decision:", data["decision"])
         st.write("Trust Score:", data["trust_score"])
 
+        st.subheader("AI Explanation")
+
+        explanation = data["explanation"]
+
+        st.write("Feature Contributions:")
+        st.json(explanation["feature_contributions"])
+
+        st.write("Total Model Impact:", explanation["total_model_impact"])
+
+        st.write("Explanation Summary:")
+
+        for reason in explanation["explanation_summary"]:
+            st.write("•", reason)
+
+        st.subheader("Risk Explanation")
+
+        if explanation:
+            exp_df = pd.DataFrame(
+                list(explanation.items()),
+                columns=["Feature", "Impact"]
+            )
+
+            st.bar_chart(exp_df.set_index("Feature"))
+
 
 # ---------------------------------
 # User Risk Trend
@@ -73,27 +99,44 @@ if history.status_code == 200:
 
 
 # ---------------------------------
-# Fraud Heatmap
+# Fraud Ring Detection
 # ---------------------------------
 
-st.header("Fraud Heatmap")
+st.header("Fraud Ring Detection")
 
-heatmap = requests.get(f"{API_URL}/fraud-heatmap")
+rings = requests.get(f"{API_URL}/fraud-rings")
 
-if heatmap.status_code == 200:
+if rings.status_code == 200:
 
-    data = heatmap.json()
+    data = rings.json()
 
-    df = pd.DataFrame(data)
+    suspicious = data["suspicious_clusters"]
 
-    if not df.empty:
+    if len(suspicious) > 0:
 
-        df = df.rename(columns={
-            "user_id": "User",
-            "risk_score": "Risk Score"
-        })
+        st.error("Suspicious Fraud Rings Detected")
 
-        st.bar_chart(df.set_index("User"))
+        G = nx.Graph()
+
+        for ring in suspicious:
+            for i in range(len(ring) - 1):
+                G.add_edge(ring[i], ring[i + 1])
+
+        fig = plt.figure()
+
+        nx.draw(
+            G,
+            with_labels=True,
+            node_color="red",
+            node_size=2000,
+            font_size=10
+        )
+
+        st.pyplot(fig)
+
+    else:
+
+        st.success("No fraud rings detected")
 
 
 # ---------------------------------
@@ -121,23 +164,31 @@ if feed.status_code == 200:
 
 
 # ---------------------------------
-# Fraud Ring Detection
+# Live Fraud Alerts
 # ---------------------------------
 
-st.header("Fraud Ring Detection")
+st.header("🚨 Live Fraud Alerts")
 
-rings = requests.get(f"{API_URL}/fraud-rings")
+alerts = requests.get(f"{API_URL}/fraud-alerts")
 
-if rings.status_code == 200:
+if alerts.status_code == 200:
 
-    data = rings.json()
+    data = alerts.json()["alerts"]
 
-    suspicious = data["suspicious_clusters"]
+    if len(data) > 0:
 
-    if len(suspicious) > 0:
+        df = pd.DataFrame(data)
 
-        st.error(f"Suspicious Fraud Ring Detected: {suspicious}")
+        df = df.rename(columns={
+            "user_id": "User",
+            "risk_score": "Risk Score",
+            "decision": "Action"
+        })
+
+        st.error("High Risk Transactions Detected")
+
+        st.dataframe(df)
 
     else:
 
-        st.success("No fraud rings detected")
+        st.success("No alerts detected")

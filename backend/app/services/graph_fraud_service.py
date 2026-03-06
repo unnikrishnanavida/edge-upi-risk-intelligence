@@ -1,5 +1,5 @@
 import networkx as nx
-from app.core.database import get_connection
+from backend.app.core.database import get_connection
 
 
 def detect_fraud_rings():
