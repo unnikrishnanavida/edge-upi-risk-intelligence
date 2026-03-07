@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import pandas as pd
+import plotly.express as px
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -192,3 +193,11 @@ if alerts.status_code == 200:
     else:
 
         st.success("No alerts detected")
+# ---------------------------------
+# risk distribution chart:
+# ---------------------------------
+
+
+        fig = px.histogram(df, x="risk_score")
+
+st.plotly_chart(fig)

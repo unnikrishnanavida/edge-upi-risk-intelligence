@@ -1,31 +1,21 @@
 import joblib
-import torch
-from app.core.logger import logger
+import numpy as np
 
-LOGISTIC_PATH = "logistic_model.pkl"
-LSTM_PATH = "lstm_model.pt"
-
-class ModelService:
+class FraudModelService:
 
     def __init__(self):
-        logger.info("Loading models...")
-        self.logistic = joblib.load(LOGISTIC_PATH)
 
-        from app.services.lstm_model import BehavioralLSTM
-        self.lstm = BehavioralLSTM(input_size=5)
-        self.lstm.load_state_dict(torch.load(LSTM_PATH))
-        self.lstm.eval()
+        self.model = joblib.load("backend/models/isolation_forest.pkl")
 
-        logger.info("Models loaded successfully.")
+    def predict_risk(self, amount, time_gap, night):
 
-    def predict(self, features):
-        log_score = self.logistic.predict_proba(features)[0][1]
+        features = np.array([[amount, time_gap, night]])
 
-        with torch.no_grad():
-            seq_input = torch.tensor(
-                features.values, dtype=torch.float32
-            ).unsqueeze(0)
-            lstm_score = torch.sigmoid(self.lstm(seq_input)).item()
+        score = self.model.decision_function(features)[0]
 
-        hybrid = 0.6 * log_score + 0.4 * lstm_score
-        return hybrid
+        risk_score = int((1 - score) * 1000)
+
+        if risk_score < 0:
+            risk_score = 0
+
+        return risk_score
