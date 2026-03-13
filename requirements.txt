@@ -1,13 +1,11 @@
-Python
-FastAPI
-Streamlit
-PostgreSQL
-Machine Learning
-Logistic Regression
-LSTM
-Explainable AI
-Fraud Detection
-Behavioral Analytics
-JSON APIs
-Git
-Docker
+fastapi
+uvicorn
+streamlit
+pandas
+numpy
+scikit-learn
+networkx
+matplotlib
+seaborn
+joblib
+pytest
