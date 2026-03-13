@@ -1,20 +1,32 @@
+import streamlit as st
+import requests
 import networkx as nx
-from pyvis.network import Network
-import streamlit.components.v1 as components
+import matplotlib.pyplot as plt
 
-def show_fraud_network(edges):
+API = "http://127.0.0.1:8000"
 
-    G = nx.Graph()
+st.title("Fraud Network Graph")
 
-    for edge in edges:
-        G.add_edge(edge[0], edge[1])
+data = requests.get(f"{API}/fraud-network").json()
 
-    net = Network(height="500px", width="100%")
+G = nx.Graph()
 
-    net.from_nx(G)
+for edge in data:
 
-    net.save_graph("fraud_network.html")
+    user = edge.get("user")
+    merchant = edge.get("merchant")
 
-    HtmlFile = open("fraud_network.html", "r", encoding="utf-8")
+    if user and merchant:
+        G.add_edge(user, merchant)
 
-    components.html(HtmlFile.read(), height=500)
+if len(G.nodes) == 0:
+
+    st.info("No network data available")
+
+else:
+
+    fig, ax = plt.subplots()
+
+    nx.draw(G, with_labels=True)
+
+    st.pyplot(fig)

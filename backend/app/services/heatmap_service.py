@@ -1,32 +1,17 @@
 from app.core.database import get_connection
+from app.services.transaction_store import get_all_transactions
+
 
 def generate_fraud_heatmap():
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    df = get_all_transactions()
 
-    query = """
-    SELECT DATE(created_at), COUNT(*)
-    FROM risk_history
-    WHERE risk_level='HIGH'
-    GROUP BY DATE(created_at)
-    ORDER BY DATE(created_at)
-    """
+    if len(df) < 2:
+        return {
+            "error": "Not enough transactions for heatmap"
+        }
 
-    cursor.execute(query)
-
-    rows = cursor.fetchall()
-
-    heatmap = []
-
-    for row in rows:
-
-        heatmap.append({
-            "date": str(row[0]),
-            "fraud_count": row[1]
-        })
-
-    cursor.close()
-    conn.close()
-
-    return heatmap
+    return {
+        "amount": df["amount"].tolist(),
+        "risk": df["risk"].tolist()
+    }

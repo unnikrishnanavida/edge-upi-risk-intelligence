@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+background:#081b3a;
+color:white;
+text-align:center;
+}
+
+table{
+margin:auto;
+border-collapse:collapse;
+}
+
+td,th{
+border:1px solid white;
+padding:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Fraud Monitoring Dashboard</h1>
+
+<table id="table">
+
+<tr>
+<th>Time</th>
+<th>User</th>
+<th>Amount</th>
+<th>Risk</th>
+<th>Decision</th>
+</tr>
+
+</table>
+
+<canvas id="riskChart"></canvas>
+
+<script>
+
+fetch("/transactions")
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let allow=0
+let block=0
+
+data.forEach(tx=>{
+
+let row=table.insertRow()
+
+row.insertCell(0).innerText=tx.timestamp
+row.insertCell(1).innerText=tx.user_id
+row.insertCell(2).innerText=tx.amount
+row.insertCell(3).innerText=tx.risk_score
+row.insertCell(4).innerText=tx.decision
+
+if(tx.decision=="BLOCK") block++
+else allow++
+
+})
+
+new Chart(riskChart,{
+type:'pie',
+data:{
+labels:["ALLOW","BLOCK"],
+datasets:[{data:[allow,block]}]
+}
+})
+
+})
+
+</script>
+
+</body>
+</html>

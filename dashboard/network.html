@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+<style>
+
+body{
+background:#0b1e46;
+color:white;
+text-align:center;
+}
+
+#network{
+width:90%;
+height:600px;
+border:1px solid white;
+margin:auto;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Fraud Network Visualization</h1>
+
+<div id="network"></div>
+
+<script>
+
+fetch("/network")
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let nodes=[]
+let edges=[]
+let seen=new Set()
+
+data.forEach(tx=>{
+
+if(!seen.has(tx.from)){
+nodes.push({id:tx.from,label:"User "+tx.from})
+seen.add(tx.from)
+}
+
+if(!seen.has(tx.to)){
+nodes.push({id:tx.to,label:"User "+tx.to})
+seen.add(tx.to)
+}
+
+edges.push({from:tx.from,to:tx.to,label:String(tx.amount)})
+
+})
+
+new vis.Network(network,{nodes:nodes,edges:edges},{})
+
+})
+
+</script>
+
+</body>
+</html>

@@ -1,24 +1,27 @@
-import numpy as np
-import joblib
-from sklearn.ensemble import IsolationForest
+import random
 
-# generate synthetic transactions
+# --------------------------------------------------
+# Dummy ML Model (for demo purposes)
+# --------------------------------------------------
 
-np.random.seed(42)
+def predict_ml(tx):
 
-normal_transactions = np.random.normal(loc=1000, scale=300, size=(1000, 3))
-fraud_transactions = np.random.normal(loc=8000, scale=2000, size=(50, 3))
+    amount = tx.get("amount", 0)
 
-X = np.vstack([normal_transactions, fraud_transactions])
+    # Simple ML-like scoring logic
+    if amount > 50000:
+        score = 0.9
+    elif amount > 10000:
+        score = 0.6
+    elif amount > 2000:
+        score = 0.3
+    else:
+        score = 0.1
 
-model = IsolationForest(
-    n_estimators=200,
-    contamination=0.02,
-    random_state=42
-)
+    # Add slight randomness to simulate ML behaviour
+    score = score + random.uniform(-0.05, 0.05)
 
-model.fit(X)
+    # Clamp score
+    score = max(0, min(1, score))
 
-joblib.dump(model, "isolation_forest.pkl")
-
-print("Model trained and saved.")
+    return score

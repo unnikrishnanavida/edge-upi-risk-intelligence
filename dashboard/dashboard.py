@@ -1,203 +1,243 @@
 import streamlit as st
 import requests
 import pandas as pd
-import plotly.express as px
+import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+from datetime import datetime
 
-API_URL = "http://127.0.0.1:8000"
+API = "http://127.0.0.1:8000"
 
-st.set_page_config(page_title="Edge UPI Risk Intelligence", layout="wide")
+st.set_page_config(page_title="Edge AI UPI Fraud System", layout="wide")
 
-st.title("🚀 Edge UPI Behavioural Risk Intelligence Dashboard")
+st.title("🚨 Edge AI UPI Behaviour Risk System")
 
-# ---------------------------------
-# Transaction Tester
-# ---------------------------------
+st.sidebar.title("Navigation")
 
-st.header("Test Transaction Risk")
+page = st.sidebar.selectbox(
+    "Select Page",
+    [
+        "Fraud Detection",
+        "Fraud Network Graph",
+        "Fraud Rings",
+        "Fraud Heatmap",
+        "Explainability",
+        "Fraud Alerts",
+        "System Monitor"
+    ]
+)
 
-user_id = st.number_input("User ID", value=1)
+# ------------------------------------------------
+# Fraud Detection
+# ------------------------------------------------
 
-amount = st.number_input("Amount", value=500)
+if page == "Fraud Detection":
 
-time_gap = st.number_input("Time Gap", value=60)
+    st.header("Fraud Risk Prediction")
 
-is_night = st.selectbox("Night Transaction", [0,1])
+    col1, col2, col3 = st.columns(3)
 
+    with col1:
+        user_id = st.text_input("User ID")
 
-if st.button("Check Risk"):
+    with col2:
+        merchant = st.text_input("Merchant")
 
-    payload = {
-        "user_id": user_id,
-        "amount": amount,
-        "time_gap": time_gap,
-        "is_night": is_night
-    }
+    with col3:
+        amount = st.number_input("Amount", min_value=0.0)
 
-    response = requests.post(f"{API_URL}/score", json=payload)
+    if st.button("Analyze Transaction"):
 
-    if response.status_code == 200:
+        payload = {
+            "amount": amount,
+            "device_score": 0.5,
+            "location_score": 0.5,
+            "velocity_score": 1,
+            "sender": user_id,
+            "receiver": merchant,
+            "timestamp": str(datetime.now())
+        }
 
-        data = response.json()
+        try:
 
-        st.success("Risk Analysis Complete")
+            response = requests.post(f"{API}/predict", json=payload)
 
-        st.write("Risk Score:", data["risk_score"])
-        st.write("Decision:", data["decision"])
-        st.write("Trust Score:", data["trust_score"])
+            if response.status_code != 200:
+                st.error(response.text)
 
-        st.subheader("AI Explanation")
+            else:
 
-        explanation = data["explanation"]
+                result = response.json()
 
-        st.write("Feature Contributions:")
-        st.json(explanation["feature_contributions"])
+                col1, col2 = st.columns(2)
 
-        st.write("Total Model Impact:", explanation["total_model_impact"])
+                with col1:
+                    st.metric("Risk Score", result["risk_score"])
 
-        st.write("Explanation Summary:")
+                with col2:
+                    level = "HIGH" if result["risk"] == 1 else "LOW"
+                    st.metric("Risk Level", level)
 
-        for reason in explanation["explanation_summary"]:
-            st.write("•", reason)
+                st.success(f"Transaction ID: {result['transaction_id']}")
 
-        st.subheader("Risk Explanation")
+        except Exception as e:
 
-        if explanation:
-            exp_df = pd.DataFrame(
-                list(explanation.items()),
-                columns=["Feature", "Impact"]
-            )
-
-            st.bar_chart(exp_df.set_index("Feature"))
-
-
-# ---------------------------------
-# User Risk Trend
-# ---------------------------------
-
-st.header("User Risk Trend")
-
-history = requests.get(f"{API_URL}/risk-history/{user_id}")
-
-if history.status_code == 200:
-
-    response = history.json()
-
-    risk_records = response["history"]
-
-    if len(risk_records) > 0:
-
-        df = pd.DataFrame({
-            "Risk Score": risk_records
-        })
-
-        st.line_chart(df)
-
-    else:
-
-        st.info("No risk history available yet")
+            st.error(f"Connection Error: {e}")
 
 
-# ---------------------------------
-# Fraud Ring Detection
-# ---------------------------------
+# ------------------------------------------------
+# Fraud Network Graph
+# ------------------------------------------------
 
-st.header("Fraud Ring Detection")
+elif page == "Fraud Network Graph":
 
-rings = requests.get(f"{API_URL}/fraud-rings")
+    st.header("Fraud Network Graph")
 
-if rings.status_code == 200:
+    try:
 
-    data = rings.json()
+        data = requests.get(f"{API}/fraud-graph").json()
 
-    suspicious = data["suspicious_clusters"]
-
-    if len(suspicious) > 0:
-
-        st.error("Suspicious Fraud Rings Detected")
+        edges = data["edges"]
 
         G = nx.Graph()
 
-        for ring in suspicious:
-            for i in range(len(ring) - 1):
-                G.add_edge(ring[i], ring[i + 1])
+        for edge in edges:
 
-        fig = plt.figure()
+            user = edge.get("user")
+            merchant = edge.get("merchant")
 
-        nx.draw(
-            G,
-            with_labels=True,
-            node_color="red",
-            node_size=2000,
-            font_size=10
-        )
+            if user and merchant:
+                G.add_edge(user, merchant)
+
+        fig, ax = plt.subplots()
+
+        nx.draw(G, with_labels=True)
 
         st.pyplot(fig)
 
-    else:
-
-        st.success("No fraud rings detected")
-
-
-# ---------------------------------
-# Live Fraud Feed
-# ---------------------------------
-
-st.header("Live Fraud Feed")
-
-feed = requests.get(f"{API_URL}/fraud-feed")
-
-if feed.status_code == 200:
-
-    records = feed.json()
-
-    df = pd.DataFrame(records)
-
-    if not df.empty:
-
-        df = df.rename(columns={
-            "user_id": "User",
-            "risk_score": "Risk Score"
-        })
-
-        st.dataframe(df)
+    except:
+        st.error("Network data unavailable")
 
 
-# ---------------------------------
-# Live Fraud Alerts
-# ---------------------------------
+# ------------------------------------------------
+# Fraud Rings
+# ------------------------------------------------
 
-st.header("🚨 Live Fraud Alerts")
+elif page == "Fraud Rings":
 
-alerts = requests.get(f"{API_URL}/fraud-alerts")
+    st.header("Detected Fraud Rings")
 
-if alerts.status_code == 200:
+    try:
 
-    data = alerts.json()["alerts"]
+        data = requests.get(f"{API}/fraud-rings").json()
 
-    if len(data) > 0:
+        rings = data["rings"]
+
+        if len(rings) == 0:
+
+            st.success("No Fraud Rings Detected")
+
+        else:
+
+            for r in rings:
+                st.warning(f"User {r[0]} → Merchant {r[1]}")
+
+    except:
+        st.error("Fraud ring data unavailable")
+
+
+# ------------------------------------------------
+# Fraud Heatmap
+# ------------------------------------------------
+
+elif page == "Fraud Heatmap":
+
+    st.header("Fraud Activity Heatmap")
+
+    try:
+
+        data = requests.get(f"{API}/heatmap").json()
+
+        if "error" in data:
+            st.warning(data["error"])
+
+        else:
+
+            df = pd.DataFrame(data)
+
+            st.scatter_chart(df)
+
+    except:
+        st.error("Heatmap unavailable")
+
+
+# ------------------------------------------------
+# Explainability
+# ------------------------------------------------
+
+elif page == "Explainability":
+
+    st.header("Model Explainability")
+
+    tx_id = st.text_input("Transaction ID")
+
+    if st.button("Explain Prediction"):
+
+        try:
+
+            data = requests.get(f"{API}/explain/{tx_id}").json()
+
+            st.json(data)
+
+        except:
+
+            st.error("Explainability service unavailable")
+
+
+# ------------------------------------------------
+# Fraud Alerts
+# ------------------------------------------------
+
+elif page == "Fraud Alerts":
+
+    st.header("Fraud Alerts")
+
+    try:
+
+        tx = requests.get(f"{API}/transactions").json()
+
+        alerts = [t for t in tx if t["risk"] == 1]
+
+        if len(alerts) == 0:
+
+            st.success("No alerts")
+
+        else:
+
+            for a in alerts:
+                st.error(f"Fraud Transaction: {a['transaction_id']}  | Risk Score: {a['risk_score']}")
+
+    except:
+
+        st.error("Alert system unavailable")
+
+
+# ------------------------------------------------
+# System Monitor
+# ------------------------------------------------
+
+elif page == "System Monitor":
+
+    st.header("System Health")
+
+    try:
+
+        data = requests.get(f"{API}/transactions").json()
 
         df = pd.DataFrame(data)
 
-        df = df.rename(columns={
-            "user_id": "User",
-            "risk_score": "Risk Score",
-            "decision": "Action"
-        })
-
-        st.error("High Risk Transactions Detected")
-
         st.dataframe(df)
 
-    else:
+    except:
 
-        st.success("No alerts detected")
-# ---------------------------------
-# risk distribution chart:
-# ---------------------------------
-
-
-        fig = px.histogram(df, x="risk_score")
-
-st.plotly_chart(fig)
+        st.error("Backend not responding")

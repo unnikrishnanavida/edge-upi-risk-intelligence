@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Edge UPI Behavioural Risk Intelligence</title>
+
+<style>
+
+body{
+background:#0a1c44;
+color:white;
+font-family:Arial;
+text-align:center;
+}
+
+input{
+display:block;
+margin:10px auto;
+padding:10px;
+width:250px;
+}
+
+button{
+padding:10px 20px;
+margin:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Edge UPI Behavioural Risk Intelligence</h1>
+
+<p>Simulate UPI Transaction</p>
+
+<input id="user_id" value="1">
+<input id="amount" value="15000">
+<input id="velocity" value="5">
+<input id="geo_risk" value="1">
+<input id="device_risk" value="1">
+
+<button onclick="submitTransaction()">Submit Transaction</button>
+
+<button onclick="openDashboard()">Fraud Dashboard</button>
+
+<button onclick="openNetwork()">Fraud Network</button>
+
+<div id="result"></div>
+
+<script>
+
+async function submitTransaction(){
+
+let data = {
+
+user_id: parseInt(user_id.value),
+amount: parseFloat(amount.value),
+velocity: parseFloat(velocity.value),
+geo_risk: parseFloat(geo_risk.value),
+device_risk: parseFloat(device_risk.value)
+
+};
+
+let response = await fetch("/score",{
+
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(data)
+
+});
+
+let result = await response.json();
+
+let reasons=result.reasons.join("<br>");
+
+document.getElementById("result").innerHTML=
+
+"<h3>Risk Score: "+result.risk_score+"</h3>"+
+"<h3>"+result.decision+"</h3>"+
+"<p>"+reasons+"</p>";
+
+}
+
+function openDashboard(){
+window.location.href="/dashboard";
+}
+
+function openNetwork(){
+window.location.href="/network-dashboard";
+}
+
+</script>
+
+</body>
+</html>
