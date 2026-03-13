@@ -1,4 +1,4 @@
-from backend.graph_fraud_detector import GraphFraudDetector
+from backend.network_detector import *
 
 detector = GraphFraudDetector()
 
