@@ -1,5 +1,6 @@
-from backend.network_detector import GraphFraudDetector
+from backend.network_detector import FraudNetworkDetector
 
-def test_graph_creation():
-    detector = GraphFraudDetector()
+def test_detector_creation():
+    detector = FraudNetworkDetector()
+
     assert detector is not None

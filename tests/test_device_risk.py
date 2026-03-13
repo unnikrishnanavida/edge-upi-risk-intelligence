@@ -1,5 +1,8 @@
-from backend.network_detector import detect_network_risk
+from backend.network_detector import FraudNetworkDetector
 
 def test_network_risk():
-    result = detect_network_risk(1, "deviceA")
-    assert result is not None
+    detector = FraudNetworkDetector()
+
+    risk = detector.check_network_risk(1, 2)
+
+    assert risk is not None

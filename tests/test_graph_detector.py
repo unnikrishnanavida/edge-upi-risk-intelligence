@@ -1,11 +1,8 @@
-from backend.network_detector import GraphFraudDetector
+from backend.network_detector import FraudNetworkDetector
 
-def test_graph_detector():
-    detector = GraphFraudDetector()
+def test_network_detector():
+    detector = FraudNetworkDetector()
 
-    detector.add_transaction("user1", "user2")
-    detector.add_transaction("user2", "user3")
+    risk = detector.check_network_risk(1, 2)
 
-    clusters = detector.detect_suspicious_clusters()
-
-    assert clusters is not None
+    assert risk >= 0
