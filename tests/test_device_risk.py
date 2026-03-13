@@ -1,5 +1,5 @@
-from backend.network_detector import *
+from backend.network_detector import detect_network_risk
 
-print(device_risk(1, "deviceA"))
-print(device_risk(1, "deviceA"))
-print(device_risk(1, "deviceB"))
+def test_network_risk():
+    result = detect_network_risk(1, "deviceA")
+    assert result is not None
