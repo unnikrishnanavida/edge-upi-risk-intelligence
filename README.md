@@ -182,7 +182,7 @@ It provides multiple analysis modules.
 
 # Fraud Intelligence Dashboard
 
-![Fraud Intelligence](screenshots/Screenshot%20\(538\).png)
+![Fraud Intelligence](screenshots/Screenshot%20\(536\).png)
 
 Provides an overview of transaction analytics and risk statistics.
 
@@ -190,7 +190,7 @@ Provides an overview of transaction analytics and risk statistics.
 
 # Live Transaction Simulator
 
-![Transaction Simulator](screenshots/Screenshot%20\(539\).png)
+![Transaction Simulator](screenshots/Screenshot%20\(538\).png)
 
 Simulates real-time transactions and evaluates fraud risk based on behavioural indicators.
 
@@ -198,7 +198,7 @@ Simulates real-time transactions and evaluates fraud risk based on behavioural i
 
 # Fraud Network Graph
 
-![Fraud Network Graph](screenshots/Screenshot%20\(540\).png)
+![Fraud Network Graph](screenshots/Screenshot%20\(539\).png)
 
 Visualizes relationships between users and merchants to identify suspicious transaction networks.
 
@@ -206,7 +206,7 @@ Visualizes relationships between users and merchants to identify suspicious tran
 
 # Fraud Rings Detection
 
-![Fraud Rings](screenshots/Screenshot%20\(541\).png)
+![Fraud Rings](screenshots/Screenshot%20\(540\).png)
 
 Detects clusters of interconnected accounts that may indicate coordinated fraud.
 
@@ -214,7 +214,7 @@ Detects clusters of interconnected accounts that may indicate coordinated fraud.
 
 # Fraud Heatmap
 
-![Fraud Heatmap](screenshots/Screenshot%20\(542\).png)
+![Fraud Heatmap](screenshots/Screenshot%20\(541\).png)
 
 Displays transaction risk distribution across simulated datasets.
 
@@ -222,7 +222,7 @@ Displays transaction risk distribution across simulated datasets.
 
 # Explainable AI (SHAP Analysis)
 
-![Explainable AI](screenshots/Screenshot%20\(543\).png)
+![Explainable AI](screenshots/Screenshot%20\(542\).png)
 
 Provides feature importance values explaining why a transaction was flagged as suspicious.
 
@@ -230,14 +230,14 @@ Provides feature importance values explaining why a transaction was flagged as s
 
 # Fraud Alerts
 
-![Fraud Alerts](screenshots/Screenshot%20\(544\).png)
+![Fraud Alerts](screenshots/Screenshot%20\(543\).png)
 
 Displays high-risk transactions detected by the system in real time.
 
 ---
 
 # GNN Fraud Detection
-
+![GNN Fraud Detection](screenshots/Screenshot%20\(544\).png)
 The system also explores **Graph Neural Network based fraud detection techniques** to detect suspicious nodes within financial transaction networks.
 
 ---
